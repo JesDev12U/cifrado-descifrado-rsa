@@ -17,59 +17,59 @@ def cifrar_archivo(public_key):
   # Seleccionar el archivo a cifrar
   file_path = filedialog.askopenfilename(title="Seleccionar archivo a cifrar", filetypes=[("Text files", "*.txt")])
   if not file_path:
-      return
+    return
 
   try:
-      with open(file_path, "rb") as file:
-          data = file.read()
+    with open(file_path, "rb") as file:
+      data = file.read()
 
-      # Generar una clave AES de 256 bits
-      session_key = get_random_bytes(32)
+    # Generar una clave AES de 256 bits
+    session_key = get_random_bytes(32)
 
-      # Cifrar el archivo con AES (usando el modo CBC)
-      cipher_aes = AES.new(session_key, AES.MODE_CBC)
-      encrypted_data = cipher_aes.encrypt(pad(data, AES.block_size))
+    # Cifrar el archivo con AES (usando el modo CBC)
+    cipher_aes = AES.new(session_key, AES.MODE_CBC)
+    encrypted_data = cipher_aes.encrypt(pad(data, AES.block_size))
 
-      # Cifrar la clave AES con la clave pública RSA
-      cipher_rsa = PKCS1_OAEP.new(RSA.import_key(public_key))
-      encrypted_session_key = cipher_rsa.encrypt(session_key)
+    # Cifrar la clave AES con la clave pública RSA
+    cipher_rsa = PKCS1_OAEP.new(RSA.import_key(public_key))
+    encrypted_session_key = cipher_rsa.encrypt(session_key)
 
-      # Guardar el archivo cifrado con la clave AES y la clave RSA cifrada
-      with open(file_path.replace(".txt", ".rsa"), "wb") as f:
-          for x in (encrypted_session_key, cipher_aes.iv, encrypted_data):
-              f.write(x)
+    # Guardar el archivo cifrado con la clave AES y la clave RSA cifrada
+    with open(file_path.replace(".txt", ".rsa"), "wb") as f:
+      for x in (encrypted_session_key, cipher_aes.iv, encrypted_data):
+        f.write(x)
 
-      messagebox.showinfo("Éxito", "Archivo cifrado exitosamente.")
+    messagebox.showinfo("Éxito", "Archivo cifrado exitosamente.")
   except Exception as e:
-      messagebox.showerror("Error", f"Ocurrió un error al cifrar el archivo: {e}")
+    messagebox.showerror("Error", f"Ocurrió un error al cifrar el archivo: {e}")
 
 # Función para descifrar un archivo usando AES + RSA (cifrado híbrido)
 def descifrar_archivo(private_key):
   file_path = filedialog.askopenfilename(title="Seleccionar archivo a descifrar", filetypes=[("RSA files", "*.rsa")])
   if not file_path:
-      return
+    return
 
   try:
-      with open(file_path, "rb") as file:
-          encrypted_session_key = file.read(512)  # RSA clave cifrada
-          iv = file.read(16)  # Vector de inicialización AES
-          encrypted_data = file.read()  # Datos cifrados
+    with open(file_path, "rb") as file:
+      encrypted_session_key = file.read(512)  # RSA clave cifrada
+      iv = file.read(16)  # Vector de inicialización AES
+      encrypted_data = file.read()  # Datos cifrados
 
-      # Descifrar la clave AES con la clave privada RSA
-      cipher_rsa = PKCS1_OAEP.new(RSA.import_key(private_key))
-      session_key = cipher_rsa.decrypt(encrypted_session_key)
+    # Descifrar la clave AES con la clave privada RSA
+    cipher_rsa = PKCS1_OAEP.new(RSA.import_key(private_key))
+    session_key = cipher_rsa.decrypt(encrypted_session_key)
 
-      # Descifrar los datos con AES
-      cipher_aes = AES.new(session_key, AES.MODE_CBC, iv)
-      decrypted_data = unpad(cipher_aes.decrypt(encrypted_data), AES.block_size)
+    # Descifrar los datos con AES
+    cipher_aes = AES.new(session_key, AES.MODE_CBC, iv)
+    decrypted_data = unpad(cipher_aes.decrypt(encrypted_data), AES.block_size)
 
-      # Mostrar el contenido descifrado
-      with open("descifrado.txt", "wb") as f:
-          f.write(decrypted_data)
+    # Mostrar el contenido descifrado
+    with open("descifrado.txt", "wb") as f:
+      f.write(decrypted_data)
 
-      messagebox.showinfo("Éxito", "Archivo descifrado exitosamente.")
+    messagebox.showinfo("Éxito", "Archivo descifrado exitosamente.")
   except Exception as e:
-      messagebox.showerror("Error", f"Ocurrió un error al descifrar el archivo: {e}")
+    messagebox.showerror("Error", f"Ocurrió un error al descifrar el archivo: {e}")
 
 # Función para verificar el inicio de sesión
 def verificar_login(usuario, contrasena, root, private_key, public_key):
@@ -78,12 +78,12 @@ def verificar_login(usuario, contrasena, root, private_key, public_key):
   contrasena_correcta = "1234"
 
   if usuario.get() == usuario_correcto and contrasena.get() == contrasena_correcta:
-      messagebox.showinfo("Inicio de sesión exitoso", "¡Bienvenido al sistema!")
-      # Habilitar los botones para cifrar y descifrar
-      root.destroy()  # Cerrar la ventana de login
-      interfaz(public_key, private_key)  # Llamar la interfaz principal después de iniciar sesión
+    messagebox.showinfo("Inicio de sesión exitoso", "¡Bienvenido al sistema!")
+    # Habilitar los botones para cifrar y descifrar
+    root.destroy()  # Cerrar la ventana de login
+    interfaz(public_key, private_key)  # Llamar la interfaz principal después de iniciar sesión
   else:
-      messagebox.showerror("Error de inicio de sesión", "Usuario o contraseña incorrectos.")
+    messagebox.showerror("Error de inicio de sesión", "Usuario o contraseña incorrectos.")
 
 # Función para la interfaz de login
 def iniciar_sesion():
