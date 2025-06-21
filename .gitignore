@@ -1,3 +1,4 @@
 /.quodo
 /.vscode
 *.rsa
+*_decrypted.txt
